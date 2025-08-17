@@ -153,28 +153,13 @@ class ViewController: NSViewController {
                 // imageView.image = NSImage(contentsOf: url)
                 maskView.image = mask
                 
-                // we have image and mask
-                
-                //let image = NSImage(contentsOfFile: "/path/to/image.png")!
-                //let mask = NSImage(contentsOfFile: "/path/to/mask.png")!
-
-                /*
-                let outputURL = FileManager.default
-                    .urls(for: .desktopDirectory, in: .userDomainMask)
-                    .first!
-                    .appendingPathComponent("output.png")
-
-                do {
-                    try combineImageWithMask(image: image, mask: mask, saveTo: outputURL)
-                    print("Image saved to \(outputURL.path)")
-                } catch {
-                    print("Error: \(error)")
-                }
-                */
-                // ---
+                // we have image and mask so export it as png
                 
                 do {
-                    try exportMaskedPNGToDesktop(baseImage: image, maskImage: mask, invertMask: false, fileName: "output.png")
+                    try exportMaskedPNGToDesktop(baseImage: image, 
+                                                 maskImage: mask,
+                                                 invertMask: false,
+                                                 sourceFileURL: url)
                  } catch {
                     NSLog("Export-Fehler: \(error.localizedDescription)")
                  }
@@ -196,11 +181,16 @@ class ViewController: NSViewController {
     ///   - baseImage: The base/content image.
     ///   - maskImage: The mask image (white = visible, black = transparent). RGB or grayscale are fine.
     ///   - invertMask: Set to `true` if your mask is inverted (white=transparent, black=opaque).
-    ///   - fileName: File name for the PNG on the Desktop (e.g. "output.png").
+    ///   - sourceFileURL: File name for the PNG on the Desktop.
     func exportMaskedPNGToDesktop(baseImage: NSImage,
                                   maskImage: NSImage,
                                   invertMask: Bool = false,
-                                  fileName: String = "output.png") throws {
+                                  sourceFileURL: URL) throws {
+        
+        // Base name (without .hpi)
+        let baseName = sourceFileURL.deletingPathExtension().lastPathComponent
+        let fileName = baseName + ".png"
+        
         let outURL = Self.desktopURL(appending: fileName)
         try Self.combineWithMask_CI(base: baseImage, mask: maskImage, invertMask: invertMask, outURL: outURL)
         print("✅ PNG gespeichert: \(outURL.path)");
